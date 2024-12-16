@@ -19,6 +19,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        manifestPlaceholders["auth0Domain"] = "@string/com_auth0_domain"
+        manifestPlaceholders["auth0Scheme"] = "demo"
     }
 
     buildTypes {
@@ -91,13 +93,5 @@ dependencies {
     implementation("org.postgresql:postgresql:42.5.0")
 
     implementation ("com.loopj.android:android-async-http:1.4.5")
-
-
-
-
-
-
-
-
-
+    implementation("com.auth0.android:auth0:2.11.0")
 }
