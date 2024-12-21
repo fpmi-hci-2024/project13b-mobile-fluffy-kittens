@@ -51,10 +51,18 @@ import com.auth0.android.authentication.AuthenticationException
 import com.auth0.android.callback.Callback
 import com.auth0.android.provider.WebAuthProvider
 import com.auth0.android.result.Credentials
+import com.fluffykittens.fluffy_shop.api.ApiService
 import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.net.HttpURLConnection
+import java.net.URL
+import com.auth0.android.jwt.JWT
 
 class MainActivity : ComponentActivity() {
     private val productsViewModel: ProductsViewModel by viewModels()
+    val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/customers")
     private lateinit var account: Auth0
     private val authViewModel: AuthViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,10 +92,35 @@ class MainActivity : ComponentActivity() {
                 }
 
                 override fun onSuccess(credentials: Credentials) {
-                    // Обновляем состояние
-                    authViewModel.isUserLoggedIn.value = true
+                    // Получаем ID токен
+                    val idToken = credentials.idToken
+
+                    // Декодируем токен для получения данных пользователя
+                    val jwt = JWT(idToken)
+                    val userId = jwt.getClaim("sub").asString()  // 'sub' обычно содержит уникальный идентификатор пользователя
+                    val email = jwt.getClaim("email").asString()
+                    val name = jwt.getClaim("name").asString()
+
+                    // Теперь, когда у нас есть данные, можно отправить их на бэкенд
+                    sendCustomerData(userId, name, email)
                 }
             })
+    }
+
+    private fun sendCustomerData(userId: String?, name: String?, email: String?) {
+        // Запрос на сервер для записи данных в базу
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val response = ApiService.createCustomer(userId, name, email)
+                if (response != null) {
+                    // Успешно добавили пользователя в базу
+                    println("Customer added successfully: $response")
+                }
+            } catch (e: Exception) {
+                // Обработка ошибки
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun logout(authViewModel: AuthViewModel) {
@@ -99,8 +132,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 override fun onSuccess(payload: Void?) {
-                    // Обновляем состояние
                     authViewModel.isUserLoggedIn.value = false
+
                 }
             })
     }
