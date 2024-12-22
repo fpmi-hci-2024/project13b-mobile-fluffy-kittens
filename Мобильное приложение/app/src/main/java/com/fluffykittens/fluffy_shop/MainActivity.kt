@@ -44,21 +44,21 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.fluffykittens.fluffy_shop.api.ProductsViewModel
-import com.fluffykittens.fluffy_shop.ui.theme.Fluffy_shopTheme
 import com.auth0.android.Auth0
 import com.auth0.android.authentication.AuthenticationException
 import com.auth0.android.callback.Callback
+import com.auth0.android.jwt.JWT
 import com.auth0.android.provider.WebAuthProvider
 import com.auth0.android.result.Credentials
 import com.fluffykittens.fluffy_shop.api.ApiService
+import com.fluffykittens.fluffy_shop.api.ProductsViewModel
+import com.fluffykittens.fluffy_shop.ui.theme.Fluffy_shopTheme
+import com.fluffykittens.fluffy_shop.ui.theme.ProductDetailPage
 import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.net.HttpURLConnection
 import java.net.URL
-import com.auth0.android.jwt.JWT
 
 class MainActivity : ComponentActivity() {
     private val productsViewModel: ProductsViewModel by viewModels()
@@ -246,7 +246,11 @@ class MainActivity : ComponentActivity() {
                         MainContent(navController)
                     }
                     composable("catalogPage") {
-                        CatalogPage()
+                        CatalogPage(navController)
+                    }
+                    composable("productDetailPage/{productId}") { backStackEntry ->
+                        val productId = backStackEntry.arguments?.getString("productId") ?: ""
+                        ProductDetailPage(productId, navController)
                     }
                     composable("aboutUsPage") {
                         AboutUsPage()

@@ -95,4 +95,5 @@ dependencies {
     implementation ("com.loopj.android:android-async-http:1.4.5")
     implementation("com.auth0.android:auth0:2.11.0")
     implementation("com.auth0.android:jwtdecode:2.0.0")
+
 }

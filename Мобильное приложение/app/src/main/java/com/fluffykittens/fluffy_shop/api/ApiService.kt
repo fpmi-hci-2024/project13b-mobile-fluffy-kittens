@@ -22,6 +22,21 @@ object ApiService {
         }
     }
 
+    suspend fun fetchProductDetails(productId: String): String {
+        return withContext(Dispatchers.IO) {
+            val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/products/$productId")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } else {
+                throw Exception("Response code: $responseCode")
+            }
+        }
+    }
+
     suspend fun createCustomer(userId: String?, name: String?, email: String?): String? {
         return withContext(Dispatchers.IO) {
             try {
@@ -53,4 +68,6 @@ object ApiService {
             }
         }
     }
+
+
 }
