@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -53,6 +54,7 @@ import com.auth0.android.provider.WebAuthProvider
 import com.auth0.android.result.Credentials
 import com.fluffykittens.fluffy_shop.api.ApiService
 import com.fluffykittens.fluffy_shop.api.ProductsViewModel
+import com.fluffykittens.fluffy_shop.ui.theme.FavoritesPage
 import com.fluffykittens.fluffy_shop.ui.theme.Fluffy_shopTheme
 import com.fluffykittens.fluffy_shop.ui.theme.ProductDetailPage
 import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
@@ -167,6 +169,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun TopBar(navController: NavController, authViewModel: AuthViewModel) {
+        val customerId = authViewModel.currentUser.value["user_id"]
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -201,7 +204,7 @@ class MainActivity : ComponentActivity() {
             if (authViewModel.isUserLoggedIn.value) {
                 // Иконка "Избранное"
                 IconButton(onClick = {
-                    navController.navigate("favoritesPage")
+                    navController.navigate("favoritesPage/$customerId")  // Pass customerId to navigate to FavoritesPage
                 }) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favorites")
                 }
@@ -262,6 +265,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("contactsPage") {
                         ContactsPage()
+                    }
+                    composable("favoritesPage/{customerId}") { backStackEntry ->
+                        val customerId = backStackEntry.arguments?.getString("customerId")
+                        if (customerId != null) {
+                            FavoritesPage(viewModel = viewModel(), customerId = customerId)  // Pass customerId to FavoritesPage
+                        }
                     }
                 }
             }
@@ -341,7 +350,6 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
-
 
 }
 

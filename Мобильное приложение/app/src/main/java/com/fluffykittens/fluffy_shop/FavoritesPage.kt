@@ -3,6 +3,7 @@ package com.fluffykittens.fluffy_shop.ui.theme
 
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,50 +52,47 @@ import com.fluffykittens.fluffy_shop.api.ProductsViewModel
 import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-//
-//@Composable
-//fun FavoritesPage(navController: NavController, favoritesViewModel: FavoritesViewModel) {
-//    val favorites by favoritesViewModel.favorites.observeAsState(emptyList()) // Обратите внимание на состояние
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp)
-//    ) {
-//        Text(
-//            text = "Favorites",
-//            fontSize = 24.sp,
-//            fontWeight = FontWeight.Bold,
-//            modifier = Modifier.padding(bottom = 16.dp)
-//        )
-//
-//        if (favorites.isEmpty()) {
-//            Text("No favorite products found.")
-//        } else {
-//            LazyColumn {
-//                items(favorites) { product ->
-//                    ProductItem(product, favoritesViewModel)
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//fun ProductItem(product: Product, favoritesViewModel: FavoritesViewModel) {
-//    Row(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(8.dp),
-//        horizontalArrangement = Arrangement.SpaceBetween
-//    ) {
-//        Text(text = product.name)
-//        IconButton(
-//            onClick = {
-//                favoritesViewModel.removeProductFromFavorites(product)
-//            }
-//        ) {
-//            Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Remove from Favorites")
-//        }
-//    }
-//}
+
+
+@Composable
+fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
+    val favoriteProducts by viewModel.favoriteProducts.collectAsState()
+
+    LaunchedEffect(customerId) {
+        // Загружаем избранные продукты при изменении customerId
+        viewModel.fetchFavoriteProducts(customerId)
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = "Your Favorite Products",
+            modifier = Modifier.padding(16.dp)
+        )
+
+        if (favoriteProducts.isEmpty()) {
+            Text(
+                text = "No favorite products available.",
+                modifier = Modifier.padding(16.dp)
+            )
+        } else {
+            LazyColumn {
+                items(favoriteProducts) { product ->
+                    // Отображаем данные каждого продукта прямо здесь
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = product.name,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            text = "\$${product.price}"
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

@@ -6,6 +6,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object ApiService {
+
+
     suspend fun fetchProducts(): String {
         return withContext(Dispatchers.IO) {
             val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/products")
@@ -117,6 +119,10 @@ object ApiService {
             }
         }
     }
+
+
+
+
 
 
 }
