@@ -2,6 +2,8 @@ package com.fluffykittens.fluffy_shop.ui.theme
 
 
 
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,11 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.fluffykittens.fluffy_shop.api.ApiService
 import com.fluffykittens.fluffy_shop.api.ProductDetailViewModel
 import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
-
+import androidx.compose.ui.platform.LocalContext
 @Composable
-
 fun ProductDetailPage(
     productId: String,
     navController: NavController,
@@ -50,9 +52,15 @@ fun ProductDetailPage(
     val product by viewModel.product.collectAsState()
     val isUserLoggedIn by authViewModel.isUserLoggedIn
 
+    // Получение информации о пользователе из SharedPreferences
+    val context = LocalContext.current
+    val userInfo = getUserInfo(context)
+    val customerId = userInfo["user_id"]
+
     LaunchedEffect(productId) {
         viewModel.fetchProductDetails(productId)
     }
+
 
     Column(
         modifier = Modifier
@@ -92,7 +100,13 @@ fun ProductDetailPage(
                             )
                         }
                         if (isUserLoggedIn) {
-                            IconButton(onClick = { /* Handle favorite click */ }) {
+                            IconButton(
+                                onClick = {
+                                    customerId?.let { id ->
+                                        viewModel.onAddToFavorites(id, productId)
+                                    }
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.FavoriteBorder,
                                     contentDescription = "Favorite"
@@ -130,3 +144,18 @@ fun ProductDetailPage(
         }
     }
 }
+
+fun getUserInfo(context: Context): Map<String, String?> {
+    val sharedPref = context.getSharedPreferences("user_data", MODE_PRIVATE)
+    val userId = sharedPref.getString("user_id", null)
+    val name = sharedPref.getString("name", null)
+    val email = sharedPref.getString("email", null)
+
+    // Возвращаем данные в виде Map
+    return mapOf(
+        "user_id" to userId,
+        "name" to name,
+        "email" to email
+    )
+}
+

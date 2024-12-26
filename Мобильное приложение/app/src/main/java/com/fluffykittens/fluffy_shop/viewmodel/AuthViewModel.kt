@@ -11,4 +11,5 @@ class AuthViewModel : ViewModel() {
         isUserLoggedIn.value = loggedIn
         currentUser.value = userInfo as Map<String, String>
     }
+
 }

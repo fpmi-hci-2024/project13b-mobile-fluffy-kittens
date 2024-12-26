@@ -34,4 +34,19 @@ class ProductDetailViewModel : ViewModel() {
             stock = jsonObject.getInt("stock")
         )
     }
+
+    fun onAddToFavorites(customerId: String, productId: String) {
+        viewModelScope.launch {
+            addToFavorites(customerId, productId)
+        }
+    }
+
+    suspend fun addToFavorites(customerId: String, productId: String) {
+        try {
+            ApiService.addProductToFavorites(customerId, productId)
+            println("Product added to favorites!")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

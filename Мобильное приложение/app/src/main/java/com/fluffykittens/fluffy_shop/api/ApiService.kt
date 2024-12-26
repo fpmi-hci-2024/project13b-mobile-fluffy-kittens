@@ -1,6 +1,5 @@
 package com.fluffykittens.fluffy_shop.api
 
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
