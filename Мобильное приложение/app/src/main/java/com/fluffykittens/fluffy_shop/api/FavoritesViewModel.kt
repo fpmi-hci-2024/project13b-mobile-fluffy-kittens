@@ -72,15 +72,4 @@ class FavoritesViewModel : ViewModel() {
             stock = json.getInt("stock")
         )
     }
-
-    fun removeProductFromFavorites(customerId: String, productId: String) {
-        viewModelScope.launch {
-            try {
-                ApiService.removeProductFromFavorites(customerId, productId)
-                _favoriteProducts.value = _favoriteProducts.value.filter { it.id != productId }
-            } catch (e: Exception) {
-                Log.e("REMOVE_PRODUCT_ERROR", "Error removing product: ${e.message}")
-            }
-        }
-    }
 }
