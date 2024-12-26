@@ -37,10 +37,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fluffykittens.fluffy_shop.api.ProductDetailViewModel
+import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
+
 @Composable
-fun ProductDetailPage(productId: String, navController: NavController) {
+
+fun ProductDetailPage(
+    productId: String,
+    navController: NavController,
+    authViewModel: AuthViewModel
+) {
     val viewModel: ProductDetailViewModel = viewModel()
     val product by viewModel.product.collectAsState()
+    val isUserLoggedIn by authViewModel.isUserLoggedIn
 
     LaunchedEffect(productId) {
         viewModel.fetchProductDetails(productId)
@@ -51,7 +59,6 @@ fun ProductDetailPage(productId: String, navController: NavController) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
         if (product == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -66,7 +73,7 @@ fun ProductDetailPage(productId: String, navController: NavController) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         IconButton(
-                            onClick = { navController.popBackStack() }, // Возвращение назад
+                            onClick = { navController.popBackStack() },
                             modifier = Modifier.size(24.dp)
                         ) {
                             Icon(
@@ -79,40 +86,44 @@ fun ProductDetailPage(productId: String, navController: NavController) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "${it.name}",
+                                text = it.name,
                                 fontSize = 30.sp,
                                 fontWeight = FontWeight.Bold,
                             )
                         }
-                        IconButton(onClick = { /* Handle favorite click */ }) {
-                            Icon(
-                                imageVector = Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite"
-                            )
+                        if (isUserLoggedIn) {
+                            IconButton(onClick = { /* Handle favorite click */ }) {
+                                Icon(
+                                    imageVector = Icons.Default.FavoriteBorder,
+                                    contentDescription = "Favorite"
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "${it.description}", fontSize = 16.sp)
+                    Text(text = it.description, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Price: $${it.price}", fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Stock: ${it.stock}", fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = { /* Add to cart action */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp),
-                        shape = RoundedCornerShape(0.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
-                        ),
-                        border = BorderStroke(1.dp, Color.Black),
-                        contentPadding = PaddingValues(vertical = 12.dp)
-                    ) {
-                        Text("Add to Cart")
+                    if (isUserLoggedIn) {
+                        Button(
+                            onClick = { /* Add to cart action */ },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            shape = RoundedCornerShape(0.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = Color.White,
+                                contentColor = Color.Black
+                            ),
+                            border = BorderStroke(1.dp, Color.Black),
+                            contentPadding = PaddingValues(vertical = 12.dp)
+                        ) {
+                            Text("Add to Cart")
+                        }
                     }
                 }
             }

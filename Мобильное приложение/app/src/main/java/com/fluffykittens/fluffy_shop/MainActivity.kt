@@ -203,7 +203,7 @@ class MainActivity : ComponentActivity() {
             if (authViewModel.isUserLoggedIn.value) {
                 // Иконка "Избранное"
                 IconButton(onClick = {
-                    // Действие для перехода в избранное
+                    navController.navigate("favoritesPage")
                 }) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favorites")
                 }
@@ -257,7 +257,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("productDetailPage/{productId}") { backStackEntry ->
                         val productId = backStackEntry.arguments?.getString("productId") ?: ""
-                        ProductDetailPage(productId, navController)
+                        ProductDetailPage(productId, navController, authViewModel)
                     }
                     composable("aboutUsPage") {
                         AboutUsPage()
