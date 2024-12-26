@@ -20,13 +20,8 @@ class FavoritesViewModel : ViewModel() {
     fun fetchFavoriteProducts(customerId: String) {
         viewModelScope.launch {
             try {
-                // Получаем JSON-ответ с избранными продуктами
                 val favoriteResponse = ApiService.getFavoritesByUserId(customerId)
-
-                // Извлекаем список productIds из ответа
                 val productIds = parseFavoriteIds(favoriteResponse)
-
-                // Загружаем данные продуктов по их id
                 val products = fetchProductDetails(productIds)
                 _favoriteProducts.value = products
             } catch (e: Exception) {
@@ -35,11 +30,11 @@ class FavoritesViewModel : ViewModel() {
         }
     }
 
-    // Измененная функция для обработки ответа как JSONObject
+
     private fun parseFavoriteIds(jsonResponse: String): List<String> {
         val ids = mutableListOf<String>()
-        val jsonObject = JSONObject(jsonResponse)  // Работаем с JSONObject, а не JSONArray
-        val productIds = jsonObject.getJSONArray("productIds")  // Извлекаем массив productIds
+        val jsonObject = JSONObject(jsonResponse)
+        val productIds = jsonObject.getJSONArray("productIds")
 
         for (i in 0 until productIds.length()) {
             ids.add(productIds.getString(i))  // Добавляем каждый productId в список
