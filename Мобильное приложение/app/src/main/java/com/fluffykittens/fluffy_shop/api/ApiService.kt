@@ -85,7 +85,6 @@ object ApiService {
         }
     }
 
-    // Метод для добавления продукта в избранное
     suspend fun addProductToFavorites(customerId: String, productId: String): String {
         return withContext(Dispatchers.IO) {
             val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/favorites/$customerId/products/$productId")
@@ -116,6 +115,21 @@ object ApiService {
                 connection.inputStream.bufferedReader().use { it.readText() }
             } else {
                 throw Exception("Error response code: $responseCode")
+            }
+        }
+    }
+
+    suspend fun getCartByUserId(customerId: String): String {
+        return withContext(Dispatchers.IO) {
+            val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/cart/$customerId")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } else {
+                throw Exception("Response code: $responseCode")
             }
         }
     }

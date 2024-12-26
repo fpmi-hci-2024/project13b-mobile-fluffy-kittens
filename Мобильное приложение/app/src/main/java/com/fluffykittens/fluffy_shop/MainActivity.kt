@@ -53,19 +53,15 @@ import com.auth0.android.jwt.JWT
 import com.auth0.android.provider.WebAuthProvider
 import com.auth0.android.result.Credentials
 import com.fluffykittens.fluffy_shop.api.ApiService
-import com.fluffykittens.fluffy_shop.api.ProductsViewModel
-import com.fluffykittens.fluffy_shop.ui.theme.FavoritesPage
 import com.fluffykittens.fluffy_shop.ui.theme.Fluffy_shopTheme
 import com.fluffykittens.fluffy_shop.ui.theme.ProductDetailPage
 import com.fluffykittens.fluffy_shop.viewmodel.AuthViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.net.URL
 
 class MainActivity : ComponentActivity() {
-    private val productsViewModel: ProductsViewModel by viewModels()
-    val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/customers")
     private lateinit var account: Auth0
     private val authViewModel: AuthViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +72,7 @@ class MainActivity : ComponentActivity() {
         )
 
         val savedToken = getToken()
-        authViewModel.isUserLoggedIn.value = savedToken != null // Проверка сохраненного токена
+        authViewModel.isUserLoggedIn.value = savedToken != null
 
         setContent {
             Fluffy_shopTheme {
@@ -90,11 +86,11 @@ class MainActivity : ComponentActivity() {
             .withScheme("demo")
             .withScope("openid profile email")
             .start(this, object : Callback<Credentials, AuthenticationException> {
-                override fun onFailure(exception: AuthenticationException) {
+                override fun onFailure(error: AuthenticationException) {
                 }
 
-                override fun onSuccess(credentials: Credentials) {
-                    val idToken = credentials.idToken
+                override fun onSuccess(result: Credentials) {
+                    val idToken = result.idToken
 
                     val jwt = JWT(idToken)
                     val userId = jwt.getClaim("sub").asString()
@@ -125,6 +121,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun sendCustomerData(userId: String?, name: String?, email: String?) {
         GlobalScope.launch(Dispatchers.IO) {
             try {
@@ -142,11 +139,11 @@ class MainActivity : ComponentActivity() {
         WebAuthProvider.logout(account)
             .withScheme("demo")
             .start(this, object : Callback<Void?, AuthenticationException> {
-                override fun onFailure(exception: AuthenticationException) {
+                override fun onFailure(error: AuthenticationException) {
                     // Обработка ошибки
                 }
 
-                override fun onSuccess(payload: Void?) {
+                override fun onSuccess(result: Void?) {
                     authViewModel.isUserLoggedIn.value = false
                     authViewModel.currentUser.value = emptyMap()
                     clearUserInfo()
@@ -197,33 +194,27 @@ class MainActivity : ComponentActivity() {
                 fontWeight = FontWeight.Bold
             )
 
-            // Распределение элементов вправо
             Spacer(modifier = Modifier.weight(1f))
 
-            // Элементы авторизации
             if (authViewModel.isUserLoggedIn.value) {
-                // Иконка "Избранное"
                 IconButton(onClick = {
                     navController.navigate("favoritesPage/$customerId")  // Pass customerId to navigate to FavoritesPage
                 }) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favorites")
                 }
 
-                // Иконка "Корзина"
                 IconButton(onClick = {
-                    // Действие для перехода в корзину
+                    navController.navigate("cartPage/$customerId")
                 }) {
                     Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = "Cart")
                 }
 
-                // Иконка "Выход"
                 IconButton(onClick = {
                     logout(authViewModel)
                 }) {
                     Icon(imageVector = Icons.Default.Person, contentDescription = "Logout")
                 }
             } else {
-                // Иконка авторизации
                 IconButton(onClick = {
                     loginWithBrowser(authViewModel)
                 }) {
@@ -272,13 +263,20 @@ class MainActivity : ComponentActivity() {
                             FavoritesPage(viewModel = viewModel(), customerId = customerId)  // Pass customerId to FavoritesPage
                         }
                     }
+
+                    composable("cartPage/{customerId}") { backStackEntry ->
+                        val customerId = backStackEntry.arguments?.getString("customerId")
+                        if (customerId != null) {
+                            CartPage(viewModel = viewModel(), customerId = customerId)
+                        }
+                    }
                 }
             }
         }
     }
 
 
-    val caveatFontFamily = FontFamily(
+    private val caveatFontFamily = FontFamily(
         Font(R.font.caveat_regular)
     )
 

@@ -4,9 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import com.fluffykittens.fluffy_shop.api.CartViewModel
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,25 +23,21 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fluffykittens.fluffy_shop.api.FavoritesViewModel
+
 
 @Composable
-fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
-    val favoriteProducts by viewModel.favoriteProducts.collectAsState()
+fun CartPage(viewModel: CartViewModel, customerId: String) {
+    val cartProducts by viewModel.cartProducts.collectAsState()
 
     LaunchedEffect(customerId) {
-        viewModel.fetchFavoriteProducts(customerId)
+        viewModel.fetchCartProducts(customerId)
     }
 
     Column(
@@ -45,15 +46,15 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
             .padding(16.dp)
     ) {
         Text(
-            text = "Your Favorite Products",
+            text = "Your Cart Products",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        if (favoriteProducts.isEmpty()) {
+        if (cartProducts.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "No favorite products available.")
+                Text(text = "No cart products available.")
             }
         } else {
             LazyColumn(
@@ -61,9 +62,9 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(favoriteProducts.size) { index ->
-                    val product = favoriteProducts[index]
-                    FavoriteItem(product.name, product.price)
+                items(cartProducts.size) { index ->
+                    val product = cartProducts[index]
+                    CartProduct(product.name, product.price)
                 }
             }
         }
@@ -71,7 +72,7 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
 }
 
 @Composable
-fun FavoriteItem(name: String, price: Double) {
+fun CartProduct(name: String, price: Double) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,7 +94,7 @@ fun FavoriteItem(name: String, price: Double) {
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start
                 )
-                Spacer(modifier = Modifier.height(8.dp)) // Space between name and price
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "$$price",
                     fontSize = 14.sp,
@@ -103,7 +104,6 @@ fun FavoriteItem(name: String, price: Double) {
                 )
             }
 
-            // Trash icon at the top-right corner
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete",
