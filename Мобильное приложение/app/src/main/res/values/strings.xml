@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Fluffy Shop</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_catalog">Catalog</string>
+    <string name="menu_basket">Basket</string>
+    <string name="menu_about_company">About Company</string>
+    <string name="menu_faq">FAQ</string>
+    <string name="menu_contact_us">Contact Us</string>
+    <string name='com_auth0_domain'>dev-03u3jiv05cfvetyf.us.auth0.com</string>
+    <string name="com_auth0_client_id">aCQw2anlpSj6sDinDe76Bt6fiYs4WWHo</string>
+</resources>
