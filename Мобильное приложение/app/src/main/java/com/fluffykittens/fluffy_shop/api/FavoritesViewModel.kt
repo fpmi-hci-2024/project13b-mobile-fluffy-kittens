@@ -26,6 +26,16 @@ class FavoritesViewModel : ViewModel() {
         }
     }
 
+    fun removeProductFromFavorites(customerId: String, productId: String) {
+        viewModelScope.launch {
+            try {
+                ApiService.removeProductFromFavorites(customerId, productId)
+                _favoriteProducts.value = _favoriteProducts.value.filter { it.id != productId }
+            } catch (e: Exception) {
+                Log.e("REMOVE_PRODUCT_ERROR", "Error removing product: ${e.message}")
+            }
+        }
+    }
 
     private fun parseFavoriteIds(jsonResponse: String): List<String> {
         val ids = mutableListOf<String>()
@@ -33,7 +43,7 @@ class FavoritesViewModel : ViewModel() {
         val productIds = jsonObject.getJSONArray("productIds")
 
         for (i in 0 until productIds.length()) {
-            ids.add(productIds.getString(i))  // Добавляем каждый productId в список
+            ids.add(productIds.getString(i))
         }
 
         return ids
