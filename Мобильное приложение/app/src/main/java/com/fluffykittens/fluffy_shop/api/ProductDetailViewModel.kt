@@ -41,9 +41,24 @@ class ProductDetailViewModel : ViewModel() {
         }
     }
 
+    fun onAddToCart(customerId: String, productId: String) {
+        viewModelScope.launch {
+            addToCart(customerId, productId)
+        }
+    }
+
     suspend fun addToFavorites(customerId: String, productId: String) {
         try {
             ApiService.addProductToFavorites(customerId, productId)
+            println("Product added to favorites!")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun addToCart(customerId: String, productId: String) {
+        try {
+            ApiService.addProductToCart(customerId, productId)
             println("Product added to favorites!")
         } catch (e: Exception) {
             e.printStackTrace()

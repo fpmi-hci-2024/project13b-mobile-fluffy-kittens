@@ -128,11 +128,9 @@ class MainActivity : ComponentActivity() {
             try {
                 val response = ApiService.createCustomer(userId, name, email)
                 if (response != null) {
-                    // Успешно добавили пользователя в базу
                     println("Customer added successfully: $response")
                 }
             } catch (e: Exception) {
-                // Обработка ошибки
                 e.printStackTrace()
             }
         }

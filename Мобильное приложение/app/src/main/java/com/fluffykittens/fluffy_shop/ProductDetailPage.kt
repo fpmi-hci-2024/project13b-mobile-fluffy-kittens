@@ -1,7 +1,5 @@
 package com.fluffykittens.fluffy_shop.ui.theme
 
-
-
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import androidx.compose.foundation.BorderStroke
@@ -124,7 +122,11 @@ fun ProductDetailPage(
 
                     if (isUserLoggedIn) {
                         Button(
-                            onClick = { /* Add to cart action */ },
+                            onClick = {
+                                customerId?.let { id ->
+                                    viewModel.onAddToCart(id, productId)
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp),
@@ -151,7 +153,6 @@ fun getUserInfo(context: Context): Map<String, String?> {
     val name = sharedPref.getString("name", null)
     val email = sharedPref.getString("email", null)
 
-    // Возвращаем данные в виде Map
     return mapOf(
         "user_id" to userId,
         "name" to name,
