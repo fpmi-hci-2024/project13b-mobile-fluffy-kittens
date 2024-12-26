@@ -4,6 +4,7 @@ package com.fluffykittens.fluffy_shop.ui.theme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,7 +94,12 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
             ) {
                 items(favoriteProducts.size) { index ->
                     val product = favoriteProducts[index]
-                    FavoriteItem(product.name, product.price)
+                    FavoriteItem(
+                        productId = product.id,
+                        name = product.name,
+                        price = product.price,
+                        onRemoveClick = { viewModel.removeProductFromFavorites(customerId, product.id) }
+                    )
                 }
             }
         }
@@ -101,7 +107,7 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
 }
 
 @Composable
-fun FavoriteItem(name: String, price: Double) {
+fun FavoriteItem(productId: String, name: String, price: Double, onRemoveClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -111,7 +117,6 @@ fun FavoriteItem(name: String, price: Double) {
         colors = CardDefaults.cardColors(containerColor = Color.LightGray)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            // Column with product name and price
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -124,7 +129,7 @@ fun FavoriteItem(name: String, price: Double) {
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start
                 )
-                Spacer(modifier = Modifier.height(8.dp)) // Space between name and price
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "$$price",
                     fontSize = 14.sp,
@@ -134,7 +139,6 @@ fun FavoriteItem(name: String, price: Double) {
                 )
             }
 
-            // Trash icon at the top-right corner
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete",
@@ -143,8 +147,8 @@ fun FavoriteItem(name: String, price: Double) {
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(24.dp)
+                    .clickable { onRemoveClick() }
             )
         }
     }
 }
-
