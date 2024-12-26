@@ -72,4 +72,19 @@ class CartViewModel : ViewModel() {
             }
         }
     }
+
+    fun placeOrder(customerId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val productIds = _cartProducts.value.map { it.id }
+                ApiService.placeOrder(customerId, productIds)
+                _cartProducts.value = emptyList()
+                onSuccess()
+            } catch (e: Exception) {
+                Log.e("PLACE_ORDER_ERROR", "Error placing order: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+        }
+    }
+
 }

@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -31,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-
 
 @Composable
 fun CartPage(viewModel: CartViewModel, customerId: String) {
@@ -59,7 +59,7 @@ fun CartPage(viewModel: CartViewModel, customerId: String) {
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.weight(1f), // Allow the list to take up available space
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -71,6 +71,29 @@ fun CartPage(viewModel: CartViewModel, customerId: String) {
                         price = product.price,
                         onRemoveClick = { viewModel.removeProductFromCart(customerId, product.id) }
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Checkout Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = {
+                        viewModel.placeOrder(
+                            customerId,
+                            onSuccess = {  },
+                            onError = { }
+                        ) // Call ViewModel method to handle checkout
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "Checkout", fontSize = 16.sp)
                 }
             }
         }
@@ -123,4 +146,3 @@ fun CartProduct(productId: String, name: String, price: Double, onRemoveClick: (
         }
     }
 }
-

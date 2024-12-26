@@ -2,12 +2,11 @@ package com.fluffykittens.fluffy_shop.api
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
 object ApiService {
-
-
     suspend fun fetchProducts(): String {
         return withContext(Dispatchers.IO) {
             val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/products")
@@ -162,9 +161,59 @@ object ApiService {
         }
     }
 
+    suspend fun placeOrder(customerId: String, productIds: List<String>): String {
+        return withContext(Dispatchers.IO) {
+            val orderId = java.util.UUID.randomUUID().toString()
+            val url = URL("https://project13b-backend-fluffy-kittens.onrender.com/orders")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.doOutput = true
+            val jsonInputString = JSONObject().apply {
+                put("id", orderId) // Уникальный ID заказа
+                put("customerId", customerId)
+                put("total", calculateTotal(productIds)) // Метод для расчета общей стоимости
+                put("status", "pending") // Статус заказа
+            }.toString()
+            // Отправляем запрос на создание заказа
+            connection.outputStream.write(jsonInputString.toByteArray())
 
+            val responseCode = connection.responseCode
+            if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
+                throw Exception("Error response code: $responseCode")
+            }
+            val responseMessage = connection.inputStream.bufferedReader().use { it.readText() }
+            println("Create Order Response: $responseMessage")  // Для отладки
 
+            // Шаг 2: Добавление продуктов в заказ
+            productIds.forEach { productId ->
+                val productUrl = URL("https://project13b-backend-fluffy-kittens.onrender.com/orders/$orderId/products/$productId")
+                val productConnection = productUrl.openConnection() as HttpURLConnection
+                productConnection.requestMethod = "POST"
+                productConnection.setRequestProperty("Content-Type", "application/json")
+                productConnection.doOutput = true
 
+                val productJsonInputString = JSONObject().apply {
+                    put("productId", productId)
+                }.toString()
 
+                productConnection.outputStream.write(productJsonInputString.toByteArray())
+                val productResponseCode = productConnection.responseCode
+                val productResponseMessage = productConnection.inputStream.bufferedReader().use { it.readText() }
+                println("Product Add Response: $productResponseMessage")
 
+                if (productResponseCode != HttpURLConnection.HTTP_OK && productResponseCode != HttpURLConnection.HTTP_CREATED) {
+                    throw Exception("Error response code when adding product: $productResponseCode")
+                }
+
+                removeProductFromCart(customerId, productId)
+            }
+
+            return@withContext orderId
+        }
+    }
+
+    fun calculateTotal(productIds: List<String>): Double {
+        return productIds.size * 10.0
+    }
 }
