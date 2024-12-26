@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
         )
 
         val savedToken = getToken()
-        authViewModel.isUserLoggedIn.value = savedToken != null
+        authViewModel.isUserLoggedIn.value = savedToken != null // Проверка сохраненного токена
 
         setContent {
             Fluffy_shopTheme {
@@ -88,27 +89,41 @@ class MainActivity : ComponentActivity() {
             .withScope("openid profile email")
             .start(this, object : Callback<Credentials, AuthenticationException> {
                 override fun onFailure(exception: AuthenticationException) {
-                    // Обработка ошибки
                 }
 
                 override fun onSuccess(credentials: Credentials) {
-                    // Получаем ID токен
                     val idToken = credentials.idToken
 
-                    // Декодируем токен для получения данных пользователя
                     val jwt = JWT(idToken)
-                    val userId = jwt.getClaim("sub").asString()  // 'sub' обычно содержит уникальный идентификатор пользователя
+                    val userId = jwt.getClaim("sub").asString()
                     val email = jwt.getClaim("email").asString()
                     val name = jwt.getClaim("name").asString()
 
-                    // Теперь, когда у нас есть данные, можно отправить их на бэкенд
+                    saveUserInfo(userId, name, email)
+
+                    mapOf("user_id" to userId, "name" to name, "email" to email).let {
+                        authViewModel.setUserLoggedIn(true,
+                            it
+                        )
+                    }
+                    println("Успешная авторизация")
                     sendCustomerData(userId, name, email)
                 }
             })
     }
 
+    private fun saveUserInfo(userId: String?, name: String?, email: String?) {
+        val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("user_id", userId)
+            putString("name", name)
+            putString("email", email)
+            apply()
+        }
+    }
+
+
     private fun sendCustomerData(userId: String?, name: String?, email: String?) {
-        // Запрос на сервер для записи данных в базу
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 val response = ApiService.createCustomer(userId, name, email)
@@ -133,15 +148,16 @@ class MainActivity : ComponentActivity() {
 
                 override fun onSuccess(payload: Void?) {
                     authViewModel.isUserLoggedIn.value = false
-
+                    authViewModel.currentUser.value = emptyMap()
+                    clearUserInfo()
                 }
             })
     }
 
-    private fun saveToken(token: String) {
-        val sharedPref = getSharedPreferences("auth", MODE_PRIVATE)
+    private fun clearUserInfo() {
+        val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
         with(sharedPref.edit()) {
-            putString("access_token", token)
+            clear()
             apply()
         }
     }
@@ -171,60 +187,51 @@ class MainActivity : ComponentActivity() {
                         }
                     }
             )
+
+            // Название приложения
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "Fluffy Shop",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
+
+            // Распределение элементов вправо
             Spacer(modifier = Modifier.weight(1f))
 
-            // Проверка на авторизацию
+            // Элементы авторизации
             if (authViewModel.isUserLoggedIn.value) {
                 // Иконка "Избранное"
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorites",
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .clickable {
-                            // Действие для перехода в избранное
-                        }
-                )
+                IconButton(onClick = {
+                    // Действие для перехода в избранное
+                }) {
+                    Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Favorites")
+                }
 
                 // Иконка "Корзина"
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = "Cart",
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .clickable {
-                            // Действие для перехода в корзину
-                        }
-                )
+                IconButton(onClick = {
+                    // Действие для перехода в корзину
+                }) {
+                    Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = "Cart")
+                }
 
                 // Иконка "Выход"
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Logout",
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .clickable {
-                            logout(authViewModel)
-                        }
-                )
+                IconButton(onClick = {
+                    logout(authViewModel)
+                }) {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = "Logout")
+                }
             } else {
                 // Иконка авторизации
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Login",
-                    modifier = Modifier.clickable {
-                        loginWithBrowser(authViewModel)
-                    }
-                )
+                IconButton(onClick = {
+                    loginWithBrowser(authViewModel)
+                }) {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = "Login")
+                }
             }
         }
     }
+
 
     @Composable
     fun FluffyShopScreen(authViewModel: AuthViewModel) {
