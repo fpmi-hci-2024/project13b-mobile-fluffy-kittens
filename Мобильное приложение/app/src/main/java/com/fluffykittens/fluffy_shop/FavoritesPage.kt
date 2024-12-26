@@ -1,5 +1,6 @@
 package com.fluffykittens.fluffy_shop
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +64,12 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
             ) {
                 items(favoriteProducts.size) { index ->
                     val product = favoriteProducts[index]
-                    FavoriteItem(product.name, product.price)
+                    FavoriteItem(
+                        productId = product.id,
+                        name = product.name,
+                        price = product.price,
+                        onRemoveClick = { viewModel.removeProductFromFavorites(customerId, product.id) }
+                    )
                 }
             }
         }
@@ -71,7 +77,7 @@ fun FavoritesPage(viewModel: FavoritesViewModel, customerId: String) {
 }
 
 @Composable
-fun FavoriteItem(name: String, price: Double) {
+fun FavoriteItem(productId: String, name: String, price: Double, onRemoveClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,6 +118,7 @@ fun FavoriteItem(name: String, price: Double) {
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(24.dp)
+                    .clickable { onRemoveClick() }
             )
         }
     }

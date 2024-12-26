@@ -1,5 +1,6 @@
 package com.fluffykittens.fluffy_shop
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,7 +65,12 @@ fun CartPage(viewModel: CartViewModel, customerId: String) {
             ) {
                 items(cartProducts.size) { index ->
                     val product = cartProducts[index]
-                    CartProduct(product.name, product.price)
+                    CartProduct(
+                        productId = product.id,
+                        name = product.name,
+                        price = product.price,
+                        onRemoveClick = { viewModel.removeProductFromCart(customerId, product.id) }
+                    )
                 }
             }
         }
@@ -72,7 +78,7 @@ fun CartPage(viewModel: CartViewModel, customerId: String) {
 }
 
 @Composable
-fun CartProduct(name: String, price: Double) {
+fun CartProduct(productId: String, name: String, price: Double, onRemoveClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,6 +118,7 @@ fun CartProduct(name: String, price: Double) {
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(24.dp)
+                    .clickable { onRemoveClick() }
             )
         }
     }

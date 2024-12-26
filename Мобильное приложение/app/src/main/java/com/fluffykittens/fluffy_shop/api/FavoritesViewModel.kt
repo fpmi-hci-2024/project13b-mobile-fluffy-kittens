@@ -1,15 +1,11 @@
 package com.fluffykittens.fluffy_shop.api
 
 import android.util.Log
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import org.json.JSONObject
 
 class FavoritesViewModel : ViewModel() {
@@ -65,5 +61,16 @@ class FavoritesViewModel : ViewModel() {
             price = json.getDouble("price"),
             stock = json.getInt("stock")
         )
+    }
+
+    fun removeProductFromFavorites(customerId: String, productId: String) {
+        viewModelScope.launch {
+            try {
+                ApiService.removeProductFromFavorites(customerId, productId)
+                _favoriteProducts.value = _favoriteProducts.value.filter { it.id != productId }
+            } catch (e: Exception) {
+                Log.e("REMOVE_PRODUCT_ERROR", "Error removing product: ${e.message}")
+            }
+        }
     }
 }

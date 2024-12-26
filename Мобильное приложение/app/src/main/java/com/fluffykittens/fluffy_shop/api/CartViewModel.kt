@@ -61,4 +61,15 @@ class CartViewModel : ViewModel() {
             stock = json.getInt("stock")
         )
     }
+
+    fun removeProductFromCart(customerId: String, productId: String) {
+        viewModelScope.launch {
+            try {
+                ApiService.removeProductFromCart(customerId, productId)
+                _cartProducts.value = _cartProducts.value.filter { it.id != productId }
+            } catch (e: Exception) {
+                Log.e("REMOVE_PRODUCT_ERROR", "Error removing product: ${e.message}")
+            }
+        }
+    }
 }
